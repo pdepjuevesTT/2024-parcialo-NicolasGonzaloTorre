@@ -138,25 +138,3 @@ class Persona {
         metodosDePago.forEach(m => m.resetearBalance(salario))
     }
 }
-CASOS DE USO
-const persona = new Persona("Juan", 20000)
-
-const efectivo = new Efectivo("Efectivo", 5000)
-const debito = new Debito("Débito", 10000)
-const credito = new Credito("Crédito", 30000)
-
-persona.agregarMetodoDePago(efectivo)
-persona.agregarMetodoDePago(debito)
-persona.agregarMetodoDePago(credito)
-
-persona.establecerMetodoDePagoPreferido("Efectivo")
-
-persona.comprar("Televisor", 4000) // Compra con efectivo
-persona.comprar("Celular", 2000)   // Error: saldo insuficiente en efectivo
-
-persona.establecerMetodoDePagoPreferido("Débito")
-persona.comprar("Celular", 2000)   // Compra con débito
-
-persona.cicloMensual() // Distribuye el salario entre los métodos
-persona.establecerMetodoDePagoPreferido("Crédito")
-persona.comprar("Laptop", 25000)  // Compra con crédito (si está dentro del límite)
