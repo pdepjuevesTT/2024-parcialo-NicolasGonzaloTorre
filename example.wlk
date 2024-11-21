@@ -1,140 +1,159 @@
-class MetodoDePago {
-    var nombre
+class Persona{
+  var property metodosDePago  
+  var property cosas 
+  var property formaDePagoPreferida
+  var property trabajo  
 
-    method initialize(nombre) {
-        this.nombre = nombre
-    }
 
-    method puedePagar(precio) {
-        throw new Error("Debe implementarse en la subclase.")
-    }
+  method tarjetasDeCreditos() = metodosDePago.filter({metodo => !metodo.debitoInstantaneo()})
 
-    method pagar(precio) {
-        throw new Error("Debe implementarse en la subclase.")
-    }
+  method totalMes() = self.deudasDelMes().sum()
 
-    method resetearBalance(salario) {
-        throw new Error("Debe implementarse en la subclase.")
-    }
+  method dineroEnEfectivo() = metodosDePago.find({metodo => metodo.efectivo()}).dineroDisponible()
+
+  method deudasDelMes() = self.tarjetasDeCreditos().map({tarjeta => tarjeta.deudaTotalPorMes()}) 
+
+  method comprarUnObjeto(objeto) {
+      cosas.add(objeto)
+      formaDePagoPreferida.efectuarCompraPor(objeto.valor()) 
+  }
+
+  method cobrarSueldo(){
+    const remanante = trabajo.sueldoActual() - self.totalMes(
+        self.tarjetasDeCreditos().forEach({tarjeta => tarjeta.pagarDeudaDelMes()})
+        self.agregarEfectivo(remanante)}
+    else self.pagarLasQuePuede(trabajo.sueldo
+  } 
+
+  method puedeComprarConMetodoPreferido(objeto) = objeto.valor() <= formaDePagoPreferida.dineroDisponible()
+
+  method pagarLasQuePuede(unDinero) {
+      self.tarjetasDeCreditos().filter({tarjeta => tarjeta.deudaTotalPorMes() < unDinero}).forEach({tarjeta => tarjeta.pagarDeudasDelMes()})
+  } 
+
+  method agregarEfectivo(unValor){ metodosDePago.find({metodo =>
+
+
+  method cantidadDeObjetosQueTiene() = self.cosas().size() 
+
+  method formaDePagoPreferida(nuevaForma) {
+    if(metodosDePago.contains(nuevaForma)) 
+      formaDePagoPreferida = nuevaForma
+    else 
+      throw new DomainException(message ="no es posible")
+  }
+} 
+
+
+
+object fecha {
+  var property mes = 0
+
+  method transcurreUnMes(
+    
+  }
+  
 }
-class Efectivo inherits MetodoDePago {
-    var saldo
 
-    method initialize(nombre, saldoInicial) {
-        super.initialize(nombre)
-        saldo = saldoInicial
-    }
+class Efectivo {
+  var property dineroDisponible 
+  var property debitoInst
+  var property efectivo = true
+  
 
-    method puedePagar(precio) {
-        return saldo >= precio
-    }
+  method efectuarCompraPor(unValor) {
+    dineroDisponible =- unValor
+    
+  }
 
-    method pagar(precio) {
-        if (!this.puedePagar(precio)) {
-            throw new Error("Saldo insuficiente en efectivo.")
-        }
-        saldo -= precio
-        print("Pago realizado con efectivo. Saldo restante: $" + saldo)
-    }
+  method recibirDineroPor(unValor) {
+    dineroDisponible =+ unValor
+    
+  }
 
-    method resetearBalance(salario) {
-        saldo += salario
-        print("Nuevo saldo en efectivo: $" + saldo)
-    }
+  method disminuirDineroPor(unValor) {
+    dineroDisponible =- unValor 
+    
+  }
+
 }
-class Debito inherits MetodoDePago {
-    var saldo
 
-    method initialize(nombre, saldoInicial) {
-        super.initialize(nombre)
-        saldo = saldoInicial
-    }
+class TarjetaCredito {
+  var property dineroDisponible 
+  var property cantidadCuotas 
+  var property interesMensual 
+  var property debitoInstantaneo = false 
+  var property efectivo = false
+  var property deudaTotalDeTarjeta  
 
-    method puedePagar(precio) {
-        return saldo >= precio
-    }
+  method deudaTotalPorMes() = deudaTocantidadCuotas 
 
-    method pagar(precio) {
-        if (!this.puedePagar(precio)) {
-            throw new Error("Saldo insuficiente en débito.")
-        }
-        saldo -= precio
-        print("Pago realizado con débito. Saldo restante: $" + saldo)
-    }
+  method efectuarCompraPor(unValor) {
+    if(dineroDisponible > unValor){
+    deudaTotalDeTarjeta =+ unValor * interesMensual
+    dineroDisponible =- unValor}
 
-    method resetearBalance(salario) {
-        saldo += salario
-        print("Nuevo saldo en débito: $" + saldo)
-    }
+    else throw new DomainException(message ="no es posible")
+  }
+  method pagarDeudasDelMes() {
+    deudaTotalDeTarjetself.deudaTotalPorMes()
+    
+  }
+
+
+  
 }
-class Credito inherits MetodoDePago {
-    var deuda
-    var limite
 
-    method initialize(nombre, limite) {
-        super.initialize(nombre)
-        deuda = 0
-        this.limite = limite
-    }
+class Debito {
+  var property dineroDisponible 
+  var property debitoInstantaneo = true 
+  var property titualaresDeLaCuenta 
+  var property efectivo = false
 
-    method puedePagar(precio) {
-        return (deuda + precio) <= limite
-    }
 
-    method pagar(precio) {
-        if (!this.puedePagar(precio)) {
-            throw new Error("Límite de crédito excedido.")
-        }
-        deuda += precio
-        print("Pago realizado con crédito. Deuda actual: $" + deuda)
-    }
+  method efectuarCompraPor(unValor) {
+    dineroDisponible =- unValor
+  }
 
-    method resetearBalance(salario) {
-        const pago = Math.min(deuda, salario)
-        deuda -= pago
-        print("Deuda reducida a: $" + deuda + " después de recibir salario.")
-    }
+  
 }
-class Persona {
-    var nombre
-    var salario
-    var metodoDePagoPreferido
-    var metodosDePago
 
-    method initialize(nombre, salario) {
-        this.nombre = nombre
-        this.salario = salario
-        this.metodoDePagoPreferido = null
-        this.metodosDePago = []
+class Trabajo{
+  var property sueldoActual
+
+  method aumentoDeSueldo(porcentaje) = 
+  if(porcentaje > 1)
+  sueldoAct
+  else 
+    throw DomainException(message = "no es posible")
+
+}
+
+class Objeto{
+  var property valor
+
+}
+
+class CompradoresCompulsivos inherits Persona{
+
+  override method comprarUnObjeto(objeto) {
+    super(objeto)
+    metodosDePago.find({metodo => metodo.dineroDisponible() > objeto.valor()}).efectuarCompraPor(objeto.valor())
     }
 
-    method agregarMetodoDePago(metodoDePago) {
-        metodosDePago.add(metodoDePago)
-    }
+}
 
-    method establecerMetodoDePagoPreferido(metodoDePago) {
-        if (!metodosDePago.includes(metodoDePago)) {
-            throw new Error("El método de pago no está registrado.")
-        }
-        metodoDePagoPreferido = metodoDePago
-    }
+class PagadoresCompulsivos inherits Persona{
 
-    method obtenerMetodoDePago(nombreMetodo) {
-        return metodosDePago.find(m => m.nombre == nombreMetodo) or 
-               throw new Error("Método de pago no encontrado.")
-    }
 
-    method comprar(item, precio) {
-        const metodo = this.obtenerMetodoDePago(metodoDePagoPreferido)
-        if (!metodo.puedePagar(precio)) {
-            throw new Error("Fondos insuficientes con el método preferido.")
-        }
-        metodo.pagar(precio)
-        print("Compra exitosa de: " + item + " por $" + precio)
-    }
+  override method cobrarSueldo() {
+    super()
+    const cantidadDeEfectivo =   metodosDePago.find({metodo => metodo.efectivo()}).dineroDisponible()
+    const remanante = trabajo.sueldoActual() - self.totalMes()
+    const diferencia = cantidadDeEfectivo - remanante
 
-    method cicloMensual() {
-        print("Distribuyendo salario: $" + salario)
-        metodosDePago.forEach(m => m.resetearBalance(salario))
-    }
+    if(diferencia > 0 ) 
+      self.tarjetasDeCreditos().forEach({tarjeta => tarjeta.pagarDeudaDelMes()})
+      self.agregarEfectivo(-diferencia)
+   }
 }
