@@ -1,139 +1,162 @@
+class MetodoDePago {
+    var nombre
+
+    method initialize(nombre) {
+        this.nombre = nombre
+    }
+
+    method puedePagar(precio) {
+        throw new Error("Debe implementarse en la subclase.")
+    }
+
+    method pagar(precio) {
+        throw new Error("Debe implementarse en la subclase.")
+    }
+
+    method resetearBalance(salario) {
+        throw new Error("Debe implementarse en la subclase.")
+    }
+}
+class Efectivo inherits MetodoDePago {
+    var saldo
+
+    method initialize(nombre, saldoInicial) {
+        super.initialize(nombre)
+        saldo = saldoInicial
+    }
+
+    method puedePagar(precio) {
+        return saldo >= precio
+    }
+
+    method pagar(precio) {
+        if (!this.puedePagar(precio)) {
+            throw new Error("Saldo insuficiente en efectivo.")
+        }
+        saldo -= precio
+        print("Pago realizado con efectivo. Saldo restante: $" + saldo)
+    }
+
+    method resetearBalance(salario) {
+        saldo += salario
+        print("Nuevo saldo en efectivo: $" + saldo)
+    }
+}
+class Debito inherits MetodoDePago {
+    var saldo
+
+    method initialize(nombre, saldoInicial) {
+        super.initialize(nombre)
+        saldo = saldoInicial
+    }
+
+    method puedePagar(precio) {
+        return saldo >= precio
+    }
+
+    method pagar(precio) {
+        if (!this.puedePagar(precio)) {
+            throw new Error("Saldo insuficiente en débito.")
+        }
+        saldo -= precio
+        print("Pago realizado con débito. Saldo restante: $" + saldo)
+    }
+
+    method resetearBalance(salario) {
+        saldo += salario
+        print("Nuevo saldo en débito: $" + saldo)
+    }
+}
+class Credito inherits MetodoDePago {
+    var deuda
+    var limite
+
+    method initialize(nombre, limite) {
+        super.initialize(nombre)
+        deuda = 0
+        this.limite = limite
+    }
+
+    method puedePagar(precio) {
+        return (deuda + precio) <= limite
+    }
+
+    method pagar(precio) {
+        if (!this.puedePagar(precio)) {
+            throw new Error("Límite de crédito excedido.")
+        }
+        deuda += precio
+        print("Pago realizado con crédito. Deuda actual: $" + deuda)
+    }
+
+    method resetearBalance(salario) {
+        const pago = Math.min(deuda, salario)
+        deuda -= pago
+        print("Deuda reducida a: $" + deuda + " después de recibir salario.")
+    }
+}
 class Persona {
-  const property formaDePago = []
-  var formaPagoPreferida 
-  var dineroDisponible
-  const property compras = []
-  var efectivo
-  var property saldo
-  const property meses = []
-  var mesActual
+    var nombre
+    var salario
+    var metodoDePagoPreferido
+    var metodosDePago
 
-  method pagarCuotaDelMes(){
-    if(dineroDisponible >= meses.get(mesActual).cuotasApagar().first()){
-      self.cobrar(self.cuotaSiguiente())
-      meses.get(mesActual).//cuotaPaga(self.cuotaSiguiente()) 
-      self.pagarCoutaDelMes
+    method initialize(nombre, salario) {
+        this.nombre = nombre
+        this.salario = salario
+        this.metodoDePagoPreferido = null
+        this.metodosDePago = []
     }
-    else(meses.get(mesActual).cuotasApagar().ad) ///(meses.get(mesActual + 1).cuotasApagar().size() > 0)
-  }
 
-  method cuotaSiguiente() {
-    if(meses.get(mesActual + 1).cuotasApagar().size() > 0){
-      meses.get(mesActual).cuotaSiguiente()
-/////
+    method agregarMetodoDePago(metodoDePago) {
+        metodosDePago.add(metodoDePago)
     }
-    
-  }
 
-  method pagar(cuota){
-    dineroDisponible = dineroDisponible - Cuota
-  }
-
-  method gastar(monto){
-    dineroDisponible = dineroDisponible - monto
-
-  } 
-
-  method actualizarSaldo(monto) {
-
-    saldo = saldo * monto
-
-  }
-
-  method actualizarDinero(monto) {
-    efectivo = efectivo - monto
-  }
-
-  method cambiarFormaDePago(formaDePag) {
-    if(self.tieneFormaDePago(formaDePag)){
-    formaPagoPreferida = formaDePag
+    method establecerMetodoDePagoPreferido(metodoDePago) {
+        if (!metodosDePago.includes(metodoDePago)) {
+            throw new Error("El método de pago no está registrado.")
+        }
+        metodoDePagoPreferido = metodoDePago
     }
-  }
 
-  method hacerCompra(monto){
-    formaPagoPreferida.utilizarMetodo(self, compras.costo())
-  }
-
- method terminaMes() {
-  mesActual += mesActual + 1
-  self.cobrar()
-  self.pagarCoutaDelMes()
-}
-
- method cobrar() {
- dineroDisponible = dineroDisponible + saldo
- }
-
- method tieneFormaDePago(formaDePag) {
-  formaDePago.contains(formaDePag)
- }
- method pagarCoutaDelMes(){
-  formaPagoPreferida.pagar(self, self.compras.costo())
- }
-}
-
-class Compra{
-  var costo
-}
-
-object efectivo {
-
-  method utilizarMetodo(persona,monto) {
-    if(persona.dineroDisponible()>= monto ){
-      persona.gastar(monto)
+    method obtenerMetodoDePago(nombreMetodo) {
+        return metodosDePago.find(m => m.nombre == nombreMetodo) or 
+               throw new Error("Método de pago no encontrado.")
     }
-    else(self.error("dinero insuficiente"))
-  }
-}
 
-class Debito{
-
-var saldo
-
-method actualizarSaldo(monto){
- saldo = saldo + monto
-}
-
- method utilizarMetodo(persona,monto) {
-    if(saldo >= monto ){
-      self.actualizarSaldo(monto)
+    method comprar(item, precio) {
+        const metodo = this.obtenerMetodoDePago(metodoDePagoPreferido)
+        if (!metodo.puedePagar(precio)) {
+            throw new Error("Fondos insuficientes con el método preferido.")
+        }
+        metodo.pagar(precio)
+        print("Compra exitosa de: " + item + " por $" + precio)
     }
-    else(self.error("dinero insuficiente"))
-  }
+
+    method cicloMensual() {
+        print("Distribuyendo salario: $" + salario)
+        metodosDePago.forEach(m => m.resetearBalance(salario))
+    }
 }
+CASOS DE USO
+const persona = new Persona("Juan", 20000)
 
-class Credito{
-  const banco
-  var coutaPorMes
-  const property cuotas = []
+const efectivo = new Efectivo("Efectivo", 5000)
+const debito = new Debito("Débito", 10000)
+const credito = new Credito("Crédito", 30000)
 
-  agregarCuotaParaPagar
+persona.agregarMetodoDePago(efectivo)
+persona.agregarMetodoDePago(debito)
+persona.agregarMetodoDePago(credito)
 
-  method utilizarMetodo(persona,monto) {
-  if(banco.montoMax() >= monto){
-    const precioDeCuota = self.precioDeCuota(monto)
-    coutaPorMes = monto/banco.cantidadCuotas()
-  }
-  
-  method agregarCuotaPagar(siguiente,couta){
-    siguiente.cuotaApagar().add(cuotas)
-  }
-  
-  }
-}
+persona.establecerMetodoDePagoPreferido("Efectivo")
 
-class Mes{
-  const property cuotaApagar = []
-  //method pagarMes {
-  
-  
-}
+persona.comprar("Televisor", 4000) // Compra con efectivo
+persona.comprar("Celular", 2000)   // Error: saldo insuficiente en efectivo
 
-class banco{
-  var montoMax
-  var cantCuotas
-  }
+persona.establecerMetodoDePagoPreferido("Débito")
+persona.comprar("Celular", 2000)   // Compra con débito
 
-class Cuota{
-  var CantCuotas
-}
+persona.cicloMensual() // Distribuye el salario entre los métodos
+persona.establecerMetodoDePagoPreferido("Crédito")
+persona.comprar("Laptop", 25000)  // Compra con crédito (si está dentro del límite)
