@@ -1,8 +1,9 @@
 class Persona{
+  
+  var property cosas
   var property metodosDePago  
-  var property cosas 
+  var property trabajo
   var property formaDePagoPreferida
-  var property trabajo  
 
 
   method tarjetasDeCreditos() = metodosDePago.filter({metodo => !metodo.debitoInstantaneo()})
